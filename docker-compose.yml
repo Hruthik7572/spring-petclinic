@@ -1,21 +1,28 @@
+version: '3.9'
 services:
-  mysql:
-    image: mysql:9.7
+  mysql-cont:
+    image: mysql:latest #Pulling the image from docker hub
+    environment: 
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
-      - "3306:3306"
-    environment:
-      - MYSQL_ROOT_PASSWORD=
-      - MYSQL_ALLOW_EMPTY_PASSWORD=true
-      - MYSQL_USER=petclinic
-      - MYSQL_PASSWORD=petclinic
-      - MYSQL_DATABASE=petclinic
+      - "3307:3306"
     volumes:
-      - "./conf.d:/etc/mysql/conf.d:ro"
-  postgres:
-    image: postgres:18.4
-    ports:
-      - "5432:5432"
+      - mysql-data:/var/libmysql
+  
+  frontend-cont:
+    build: .
+    image: m51-pet-img:latest
     environment:
-      - POSTGRES_PASSWORD=petclinic
-      - POSTGRES_USER=petclinic
-      - POSTGRES_DB=petclinic
+      SPRING_URL: ${SPRING_URL}
+      SPRING_USERNAME: ${SPRING_USERNAME}
+      SPRING_PASSWORD: ${SPRINGPASSWORD}
+    depends_on:
+      - mysql-cont
+    ports:
+      - "${SERVER_PORT}:8080"
+
+volumes: #volume creationS
+  mysql-data:
